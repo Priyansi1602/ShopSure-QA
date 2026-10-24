@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopSure QA — Executive Quality & Test Automation Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-mark">SS</div>
+        <div>
+          <h2>ShopSure QA</h2>
+          <span class="badge-sub">API Test Suite</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#overview" class="nav-item active">
+          <span class="icon">📊</span> Overview
+        </a>
+        <a href="#modules" class="nav-item">
+          <span class="icon">📦</span> Module Coverage
+        </a>
+        <a href="#test-cases" class="nav-item">
+          <span class="icon">📋</span> Test Cases
+        </a>
+        <a href="#defects" class="nav-item">
+          <span class="icon">🐞</span> Defect Log
+        </a>
+        <a href="#evidence" class="nav-item">
+          <span class="icon">📸</span> Execution Evidence
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="env-info">
+          <strong>SUT:</strong> dummyjson.com<br>
+          <strong>Status:</strong> <span class="status-live">Live Verified</span><br>
+          <strong>Engine:</strong> Postman & Newman
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="top-bar">
+        <div>
+          <h1>Quality Assurance & Test Automation Dashboard</h1>
+          <p class="subtitle">E-Commerce REST API Quality Verification — Placements Portfolio</p>
+        </div>
+        <div class="header-badges">
+          <span class="badge verified-pill">✓ Verified Live Execution</span>
+          <span class="date-badge" id="execution-date">October 2026</span>
+        </div>
+      </header>
+
+      <!-- Overview KPI Cards -->
+      <section id="overview" class="section">
+        <div class="kpi-grid">
+          <div class="kpi-card total-card">
+            <span class="kpi-label">Total Test Cases</span>
+            <div class="kpi-value" id="kpi-total">34</div>
+            <span class="kpi-sub">100% Documented Scope</span>
+          </div>
+          <div class="kpi-card exec-card">
+            <span class="kpi-label">Executed Cases</span>
+            <div class="kpi-value" id="kpi-executed">34</div>
+            <span class="kpi-sub">100% Execution Rate</span>
+          </div>
+          <div class="kpi-card pass-card">
+            <span class="kpi-label">Passed Tests</span>
+            <div class="kpi-value" id="kpi-passed">34</div>
+            <span class="kpi-sub text-success">100% Pass Rate</span>
+          </div>
+          <div class="kpi-card fail-card">
+            <span class="kpi-label">Failed Tests</span>
+            <div class="kpi-value" id="kpi-failed">0</div>
+            <span class="kpi-sub text-muted">0 Blocking Deficiencies</span>
+          </div>
+          <div class="kpi-card assert-card">
+            <span class="kpi-label">Automated Assertions</span>
+            <div class="kpi-value" id="kpi-assertions">59/59</div>
+            <span class="kpi-sub">Postman & Newman Runner</span>
+          </div>
+        </div>
+
+        <!-- Charts Container -->
+        <div class="charts-row">
+          <div class="chart-box">
+            <h3>Test Execution Status</h3>
+            <canvas id="statusChart" width="300" height="240"></canvas>
+            <div class="chart-legend" id="status-legend"></div>
+          </div>
+          <div class="chart-box flex-grow">
+            <h3>Module-Wise Coverage</h3>
+            <canvas id="moduleChart" width="500" height="240"></canvas>
+            <div class="chart-legend" id="module-legend"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Module Summary Section -->
+      <section id="modules" class="section">
+        <div class="section-header">
+          <h2>Module-Wise Test Breakdown</h2>
+          <span class="section-tag">Functional Scope</span>
+        </div>
+        <div class="table-card">
+          <table class="data-table" id="module-table">
+            <thead>
+              <tr>
+                <th>Module Name</th>
+                <th>Total Cases</th>
+                <th>Passed</th>
+                <th>Failed</th>
+                <th>Blocked</th>
+                <th>Not Run</th>
+                <th>Pass Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Injected by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Defect Summary Section -->
+      <section id="defects" class="section">
+        <div class="section-header">
+          <h2>Defect & Behavioral Observations Log</h2>
+          <span class="section-tag tag-warning">3 Verified Logs</span>
+        </div>
+        <div class="table-card">
+          <table class="data-table" id="defect-table">
+            <thead>
+              <tr>
+                <th>Defect ID</th>
+                <th>Module</th>
+                <th>Summary</th>
+                <th>Severity</th>
+                <th>Priority</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Injected by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Test Cases Table Section -->
+      <section id="test-cases" class="section">
+        <div class="section-header">
+          <div>
+            <h2>Test Case Repository & Execution Evidence</h2>
+            <p class="section-desc">Search, filter, and inspect live responses across all 34 test cases.</p>
+          </div>
+          <div class="filter-controls">
+            <input type="text" id="searchInput" placeholder="Search by ID, title, or steps..." class="search-input">
+            <select id="statusFilter" class="select-filter">
+              <option value="ALL">All Statuses</option>
+              <option value="Pass">Pass</option>
+              <option value="Fail">Fail</option>
+              <option value="Blocked">Blocked</option>
+              <option value="Not Run">Not Run</option>
+            </select>
+            <select id="moduleFilter" class="select-filter">
+              <option value="ALL">All Modules</option>
+              <option value="Product Management">Product Management</option>
+              <option value="Authentication">Authentication</option>
+              <option value="Shopping Cart">Shopping Cart</option>
+              <option value="Order Validation">Order Validation</option>
+              <option value="API Quality & SLA">API Quality & SLA</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <table class="data-table" id="testcases-table">
+            <thead>
+              <tr>
+                <th style="width: 110px;">ID</th>
+                <th style="width: 140px;">Module</th>
+                <th>Test Scenario</th>
+                <th>Expected Result</th>
+                <th>Actual Result (Live Evidence)</th>
+                <th style="width: 90px;">Status</th>
+                <th style="width: 80px;">Priority</th>
+              </tr>
+            </thead>
+            <tbody id="testcases-body">
+              <!-- Injected by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="dashboard-footer">
+        <p>ShopSure QA — Final Year B.Tech IT Quality Assurance & API Automation Portfolio Project</p>
+        <p>Verified against <code>https://dummyjson.com</code> | MIT License | Postman Collection v2.1.0</p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
