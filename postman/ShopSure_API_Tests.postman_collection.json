@@ -1,0 +1,1292 @@
+{
+  "info": {
+    "_postman_id": "4e1f728c-9c02-4b2a-8bc1-12f7a934d567",
+    "name": "ShopSure API Testing Suite",
+    "description": "Comprehensive automated and manual QA test suite for the ShopSure E-Commerce API (System Under Test: DummyJSON). Covers Product Management, Authentication & Security, Shopping Cart workflows, Order-workflow boundaries, and Quality SLAs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Products",
+      "description": "Validation of product catalog, single product lookup, boundary IDs, search functionality, category filters, and error handling.",
+      "item": [
+        {
+          "name": "PROD_01: Retrieve All Products (Pagination & Limits)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is within acceptable threshold\", function () {",
+                  "    var maxTime = Number(pm.environment.get(\"maxResponseTime\")) || 3000;",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxTime);",
+                  "});",
+                  "",
+                  "pm.test(\"Response body has required pagination fields\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"products\");",
+                  "    pm.expect(jsonData).to.have.property(\"total\");",
+                  "    pm.expect(jsonData).to.have.property(\"skip\");",
+                  "    pm.expect(jsonData).to.have.property(\"limit\");",
+                  "    pm.expect(Array.isArray(jsonData.products)).to.be.true;",
+                  "    pm.expect(jsonData.limit).to.eql(5);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?limit=5&skip=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5"
+                },
+                {
+                  "key": "skip",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "Validates retrieval of the product catalog with pagination query parameters limit=5 and skip=0."
+          },
+          "response": []
+        },
+        {
+          "name": "PROD_02: Retrieve Product by Valid ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Product ID matches requested ID\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var expectedId = Number(pm.environment.get(\"validProductId\")) || 1;",
+                  "    pm.expect(jsonData.id).to.eql(expectedId);",
+                  "});",
+                  "",
+                  "pm.test(\"Product schema attributes and types are valid\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.title).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(jsonData.price).to.be.a(\"number\").and.be.above(0);",
+                  "    pm.expect(jsonData.category).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(jsonData.stock).to.be.a(\"number\").and.be.at.least(0);",
+                  "    pm.expect(jsonData.rating).to.be.a(\"number\").and.be.within(0, 5);",
+                  "    pm.expect(jsonData.images).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{validProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{validProductId}}"
+              ]
+            },
+            "description": "Validates retrieving a specific single product using a valid existing ID."
+          },
+          "response": []
+        },
+        {
+          "name": "PROD_03: Retrieve Product by Invalid ID (Negative)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Error message explains product not found\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"message\");",
+                  "    pm.expect(jsonData.message).to.include(\"not found\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{invalidProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{invalidProductId}}"
+              ]
+            },
+            "description": "Verifies that querying a non-existent out-of-bounds product ID (99999) returns a standard 404 response."
+          },
+          "response": []
+        },
+        {
+          "name": "PROD_04: Retrieve Product by Boundary Negative ID (Boundary)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404 Not Found for negative ID\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Error message correctly identifies negative ID\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"message\");",
+                  "    pm.expect(jsonData.message).to.include(\"-1\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/-1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "-1"
+              ]
+            },
+            "description": "Boundary value test verifying API handling of negative integer product IDs."
+          },
+          "response": []
+        },
+        {
+          "name": "PROD_05: Search Products by Keyword",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Search returns matching products\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.products).to.be.an(\"array\");",
+                  "    pm.expect(jsonData.total).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/search?q={{searchQuery}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{searchQuery}}"
+                }
+              ]
+            },
+            "description": "Verifies full-text search capability by passing query param q=phone."
+          },
+          "response": []
+        },
+        {
+          "name": "PROD_06: Search Products by Non-Existent Keyword",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Search returns empty list for non-matching query\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.products).to.be.an(\"array\").that.is.empty;",
+                  "    pm.expect(jsonData.total).to.eql(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/search?q=xyz987qweNonExistentKey",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "xyz987qweNonExistentKey"
+                }
+              ]
+            },
+            "description": "Verifies search returns 0 products with HTTP 200 when no items match."
+          },
+          "response": []
+        },
+        {
+          "name": "PROD_07: Retrieve Product Categories List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Categories list is a non-empty array of category objects\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "    pm.expect(jsonData.length).to.be.above(5);",
+                  "    pm.expect(jsonData[0]).to.have.property(\"slug\");",
+                  "    pm.expect(jsonData[0]).to.have.property(\"name\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "categories"
+              ]
+            },
+            "description": "Fetches full list of product categories and validates category schema objects."
+          },
+          "response": []
+        },
+        {
+          "name": "PROD_08: Filter Products by Category Slug",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"All returned products belong to filtered category\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var categorySlug = pm.environment.get(\"categorySlug\") || \"smartphones\";",
+                  "    pm.expect(jsonData.products).to.be.an(\"array\").and.not.empty;",
+                  "    jsonData.products.forEach(function(item) {",
+                  "        pm.expect(item.category.toLowerCase()).to.eql(categorySlug.toLowerCase());",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/category/{{categorySlug}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "category",
+                "{{categorySlug}}"
+              ]
+            },
+            "description": "Filters catalog by category slug and verifies every returned item matches that category."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication",
+      "description": "User login, credential validation, dynamic token extraction, protected profile access, and unauthorized rejection.",
+      "item": [
+        {
+          "name": "AUTH_01: Login with Valid Credentials (Token Capture)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK on valid login\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response returns JWT access token and user info\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"accessToken\");",
+                  "    pm.expect(jsonData.accessToken).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(jsonData).to.have.property(\"id\");",
+                  "    pm.expect(jsonData.username).to.eql(pm.environment.get(\"demoUsername\"));",
+                  "    ",
+                  "    // Dynamically store token and userId into environment",
+                  "    pm.environment.set(\"authToken\", jsonData.accessToken);",
+                  "    pm.environment.set(\"currentUserId\", jsonData.id);",
+                  "    console.log(\"Auth token captured successfully:\", jsonData.accessToken.substring(0, 15) + \"...\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Authenticates with verified demo credentials (emilys / emilyspass) and stores accessToken dynamically into the environment.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{demoUsername}}\",\n  \"password\": \"{{demoPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AUTH_02: Login with Invalid Password (Negative)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request for incorrect password\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error message is 'Invalid credentials'\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"message\");",
+                  "    pm.expect(jsonData.message).to.eql(\"Invalid credentials\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Submits valid username with wrong password; verifies HTTP 400 rejection.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{demoUsername}}\",\n  \"password\": \"WrongPassword#999\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AUTH_03: Login with Non-Existent User (Negative)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request for non-existent user\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error message states 'Invalid credentials'\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"Invalid credentials\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Submits a non-existent username to confirm authentication failure.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"non_existent_tester_999\",\n  \"password\": \"SamplePassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AUTH_04: Login with Missing Password Field (Validation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request for missing password\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error message states username and password required\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"Username and password required\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Omits mandatory password property from login request body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{demoUsername}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AUTH_05: Login with Empty JSON Body (Validation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request for empty body\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error message states username and password required\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"Username and password required\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Submits empty JSON object {} to verify required field validation."
+          },
+          "response": []
+        },
+        {
+          "name": "AUTH_06: Access Protected Profile with Valid Bearer Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK for valid bearer token\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Returns authenticated user profile\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"id\");",
+                  "    pm.expect(jsonData.username).to.eql(pm.environment.get(\"demoUsername\"));",
+                  "    pm.expect(jsonData).to.have.property(\"email\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Accesses protected /auth/me route using dynamically extracted Bearer token."
+          },
+          "response": []
+        },
+        {
+          "name": "AUTH_07: Access Protected Profile with Tampered Token (Security)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized for invalid token\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Error message specifies Invalid/Expired Token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"Invalid/Expired Token!\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid_or_tampered_jwt_token_here",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Attempts to access protected route with an invalid JWT to verify rejection."
+          },
+          "response": []
+        },
+        {
+          "name": "AUTH_08: Access Protected Profile with Missing Token (Security)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized when token is missing\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Error message states Access Token is required\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"Access Token is required\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Attempts to query protected endpoint without Authorization header."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Shopping Cart",
+      "description": "Shopping cart retrieval, cart item calculations, cart simulation (add, update, delete), and boundary checks.",
+      "item": [
+        {
+          "name": "CART_01: Retrieve All Shopping Carts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains carts array and pagination metadata\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"carts\");",
+                  "    pm.expect(Array.isArray(jsonData.carts)).to.be.true;",
+                  "    pm.expect(jsonData.carts.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts?limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Retrieves a list of active carts with pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "CART_02: Retrieve Cart by Valid ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Cart details and products calculations are consistent\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var expectedId = Number(pm.environment.get(\"validCartId\")) || 1;",
+                  "    pm.expect(jsonData.id).to.eql(expectedId);",
+                  "    pm.expect(jsonData.products).to.be.an(\"array\").and.not.empty;",
+                  "    pm.expect(jsonData.total).to.be.a(\"number\").and.above(0);",
+                  "    pm.expect(jsonData.discountedTotal).to.be.a(\"number\").and.above(0);",
+                  "    pm.expect(jsonData.totalQuantity).to.be.a(\"number\").and.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{validCartId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{validCartId}}"
+              ]
+            },
+            "description": "Validates single cart retrieval and verifies product line item calculations."
+          },
+          "response": []
+        },
+        {
+          "name": "CART_03: Retrieve Cart by Invalid ID (Negative)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404 Not Found for invalid cart\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Error message explains cart not found\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"message\");",
+                  "    pm.expect(jsonData.message).to.include(\"not found\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{invalidCartId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{invalidCartId}}"
+              ]
+            },
+            "description": "Queries non-existent cart ID 99999 to verify 404 error handling."
+          },
+          "response": []
+        },
+        {
+          "name": "CART_04: Add Products to Cart (Simulation & Calculation Validation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created for simulated cart addition\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Simulated cart computes quantities and line totals correctly\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"id\");",
+                  "    pm.expect(jsonData.userId).to.eql(Number(pm.environment.get(\"currentUserId\")) || 1);",
+                  "    pm.expect(jsonData.products).to.be.an(\"array\");",
+                  "    pm.expect(jsonData.products.length).to.eql(2);",
+                  "    pm.expect(jsonData.totalQuantity).to.eql(3); // 2 + 1 = 3",
+                  "    pm.expect(jsonData.total).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/add",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "add"
+              ]
+            },
+            "description": "Simulates creating/adding to a cart with multiple line items; validates totals calculation.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"products\": [\n    {\n      \"id\": 1,\n      \"quantity\": 2\n    },\n    {\n      \"id\": 2,\n      \"quantity\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CART_05: Update Cart Item Quantity (Simulation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK for simulated cart update\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Updated cart reflects modified items\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"products\");",
+                  "    pm.expect(jsonData.total).to.be.a(\"number\").and.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{validCartId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{validCartId}}"
+              ]
+            },
+            "description": "Simulates updating product quantity in an existing cart.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"merge\": true,\n  \"products\": [\n    {\n      \"id\": 1,\n      \"quantity\": 4\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CART_06: Delete Cart (Simulation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK for simulated cart deletion\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Deletion response includes isDeleted flag and timestamp\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.isDeleted).to.be.true;",
+                  "    pm.expect(jsonData).to.have.property(\"deletedOn\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/{{validCartId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "{{validCartId}}"
+              ]
+            },
+            "description": "Simulates cart deletion; validates return of isDeleted: true and deletedOn timestamp."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Regression Tests",
+      "description": "Non-functional SLA validation, strict schema types, pagination edge cases, and documented order boundary limits.",
+      "item": [
+        {
+          "name": "REG_01: Performance SLA & Header Integrity Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"SLA Response time is strictly under configured threshold\", function () {",
+                  "    var threshold = Number(pm.environment.get(\"maxResponseTime\")) || 2000;",
+                  "    pm.expect(pm.response.responseTime).to.be.below(threshold);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type header confirms UTF-8 JSON encoding\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Regression SLA check confirming server meets configured response latency threshold."
+          },
+          "response": []
+        },
+        {
+          "name": "REG_02: Product Schema & Data Types Strict Validation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Data contract types match strict specification\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(typeof jsonData.id).to.eql(\"number\");",
+                  "    pm.expect(typeof jsonData.title).to.eql(\"string\");",
+                  "    pm.expect(typeof jsonData.price).to.eql(\"number\");",
+                  "    pm.expect(typeof jsonData.discountPercentage).to.eql(\"number\");",
+                  "    pm.expect(typeof jsonData.rating).to.eql(\"number\");",
+                  "    pm.expect(typeof jsonData.stock).to.eql(\"number\");",
+                  "    pm.expect(Array.isArray(jsonData.tags)).to.be.true;",
+                  "    pm.expect(typeof jsonData.thumbnail).to.eql(\"string\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "1"
+              ]
+            },
+            "description": "Validates that data types of core product fields strictly match specifications."
+          },
+          "response": []
+        },
+        {
+          "name": "REG_03: Pagination Boundary (limit=0)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Limit=0 returns all available products per API specification\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.products).to.be.an(\"array\");",
+                  "    pm.expect(jsonData.products.length).to.eql(jsonData.total);",
+                  "    pm.expect(jsonData.limit).to.eql(jsonData.total);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?limit=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "Boundary test validating pagination behavior when limit=0."
+          },
+          "response": []
+        },
+        {
+          "name": "REG_04: Documented Limitation Check - Query Orders Endpoint",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Documented Limitation: Endpoint returns 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Confirms DummyJSON does not expose native /orders endpoint\", function () {",
+                  "    // Asserting verified architectural boundary",
+                  "    pm.expect(pm.response.code).to.eql(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
+            "description": "Regression validation asserting documented limitation: DummyJSON has no native /orders route."
+          },
+          "response": []
+        },
+        {
+          "name": "REG_05: Documented Limitation Check - Direct Checkout Simulation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Documented Limitation: Checkout endpoint returns 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Rejection handled cleanly without 500 internal server error\", function () {",
+                  "    pm.expect(pm.response.code).to.not.eql(500);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/checkout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkout"
+              ]
+            },
+            "description": "Validates that calling an unexposed /checkout route fails gracefully with 404 rather than 500.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cartId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "REG_06: Response Header & Server Security Integrity Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response headers include standard caching and connection controls\", function () {",
+                  "    pm.expect(pm.response.headers.has(\"Content-Type\")).to.be.true;",
+                  "    pm.expect(pm.response.headers.has(\"Connection\")).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "1"
+              ]
+            },
+            "description": "Validates response header integrity and standard security hygiene."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
