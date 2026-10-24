@@ -1,0 +1,11 @@
+Metric,Value
+Total Test Cases,34
+Executed Test Cases,34
+Passed,34
+Failed,0
+Blocked,0
+Not Run,0
+Pass Rate (%),100.0%
+Execution Date,2026-10-24
+System Under Test,https://dummyjson.com
+Total Verified Defects Logged,3
