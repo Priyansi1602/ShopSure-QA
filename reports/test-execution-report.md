@@ -3,7 +3,7 @@
 **Project**: ShopSure QA — E-Commerce Quality Assurance and API Testing Suite  
 **System Under Test (SUT)**: DummyJSON E-Commerce REST API (`https://dummyjson.com`)  
 **Execution Date**: October 2026  
-**Test Lead**: Senior QA Engineer  
+**Test Lead**: Priyansi Prajapati (Senior QA Engineer)  
 **Report Status**: Approved / Test Closure Complete  
 
 ---

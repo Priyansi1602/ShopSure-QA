@@ -1,5 +1,6 @@
 # ShopSure QA — E-Commerce Quality Assurance & API Testing Suite
 
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Priyansi1602%2FShopSure--QA-blue?logo=github)](https://github.com/Priyansi1602/ShopSure-QA)
 [![API Testing](https://img.shields.io/badge/API%20Testing-Postman%20%7C%20Newman-orange.svg)](https://www.postman.com/)
 [![Test Cases](https://img.shields.io/badge/Test%20Cases-34%20Documented-blue.svg)](test-cases/test-cases.csv)
 [![Pass Rate](https://img.shields.io/badge/Pass%20Rate-100%25-brightgreen.svg)](reports/test-execution-report.md)
@@ -7,6 +8,7 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%2011%20%7C%20PowerShell-blue.svg)]()
 
 > **Final-Year B.Tech Information Technology QA Portfolio Project**  
+> **Author**: [Priyansi Prajapati (@Priyansi1602)](https://github.com/Priyansi1602)  
 > An enterprise-grade Quality Assurance, Manual Testing, and REST API Test Automation Suite developed for the **ShopSure** E-Commerce platform (System Under Test: [DummyJSON API](https://dummyjson.com)).
 
 ---
@@ -156,7 +158,7 @@ ShopSure-QA/
 ### Step 1: Clone the Repository
 Open PowerShell and clone the project:
 ```powershell
-git clone https://github.com/<your-username>/ShopSure-QA.git
+git clone https://github.com/Priyansi1602/ShopSure-QA.git
 cd ShopSure-QA
 ```
 
@@ -177,7 +179,7 @@ pip install openpyxl requests
 4. In the top-right environment selector of Postman, switch from *No Environment* to **`ShopSure_Environment`**.
 5. Click the environment quick-look (eye icon) to confirm variables:
    - `baseUrl`: `https://dummyjson.com`
-   - `maxResponseTime`: `3000`
+   - `maxResponseTime`: `5000`
    - `demoUsername`: `emilys`
    - `demoPassword`: `emilyspass`
 
@@ -314,8 +316,8 @@ Follow these exact steps from PowerShell to publish your project:
 # 1. Initialize git and commit all files (already completed locally)
 git status
 
-# 2. Add your GitHub remote repository (replace with your repository URL)
-git remote add origin https://github.com/<your-username>/ShopSure-QA.git
+# 2. Add your GitHub remote repository
+git remote add origin https://github.com/Priyansi1602/ShopSure-QA.git
 
 # 3. Rename default branch to main
 git branch -M main
@@ -350,5 +352,6 @@ git push -u origin main
 ## 20. Credits & License
 
 - **System Under Test**: [DummyJSON](https://dummyjson.com) by Muhammad Ovi
-- **Author**: Lead QA Engineer & B.Tech Information Technology Candidate
+- **Author**: [Priyansi Prajapati (@Priyansi1602)](https://github.com/Priyansi1602) — Final-Year B.Tech Information Technology Candidate
+- **Repository**: [https://github.com/Priyansi1602/ShopSure-QA](https://github.com/Priyansi1602/ShopSure-QA)
 - **License**: Released under the [MIT License](LICENSE).

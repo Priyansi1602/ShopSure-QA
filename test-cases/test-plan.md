@@ -4,7 +4,7 @@
 **System Under Test (SUT)**: DummyJSON E-Commerce REST API (`https://dummyjson.com`)  
 **Document Standard**: Aligned with IEEE 829 Standard for Software Test Documentation  
 **Version**: 1.0.0  
-**Author**: Lead QA Engineer  
+**Author**: Priyansi Prajapati (Lead QA Engineer)  
 **Date**: October 2026  
 
 ---
